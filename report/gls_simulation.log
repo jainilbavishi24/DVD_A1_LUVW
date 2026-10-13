@@ -1,0 +1,3 @@
+VCD info: dumpfile mult.vcd opened for output.
+PASS: 256 vectors checked, 0 errors
+tb/tb_mult.v:60: $finish called at 5147000 (1ps)

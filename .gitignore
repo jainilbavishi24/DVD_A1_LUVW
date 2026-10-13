@@ -1,0 +1,17 @@
+# Large, reproducible LibreLane working directories are not submission artifacts.
+pnr/runs/
+
+# Local simulator executables and waveform output.
+sim
+gls
+sim_fault
+mult.vcd
+
+# LaTeX intermediates; report/report.pdf and report/report.tex are tracked.
+report/report.aux
+report/report.log
+report/report.out
+
+# LibreLane's detailed run transcripts are large and reproducible. The final
+# metrics, GDSII, screenshots and report remain versioned.
+report/librelane*.log

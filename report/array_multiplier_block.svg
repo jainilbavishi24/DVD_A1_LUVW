@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="510" viewBox="0 0 1120 510">
+  <style>
+    text { font-family: Arial, sans-serif; fill: #172033; }
+    .title { font-size: 24px; font-weight: bold; }
+    .label { font-size: 18px; font-weight: bold; }
+    .detail { font-size: 15px; }
+    .box { stroke: #1d4ed8; stroke-width: 2.5; fill: #eff6ff; rx: 12; }
+    .array { stroke: #a16207; stroke-width: 2.5; fill: #fffbeb; rx: 12; }
+    .reg { stroke: #047857; stroke-width: 2.5; fill: #ecfdf5; rx: 12; }
+    .arrow { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    .wire { stroke: #64748b; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#334155"/></marker>
+  </defs>
+  <text x="560" y="38" text-anchor="middle" class="title">Registered structural 4-bit unsigned array multiplier</text>
+  <text x="560" y="64" text-anchor="middle" class="detail">mult_array — 16 AND gates, 12 full adders, 16 flip-flops</text>
+
+  <rect class="box" x="35" y="170" width="130" height="130"/>
+  <text x="100" y="210" text-anchor="middle" class="label">Inputs</text>
+  <text x="100" y="242" text-anchor="middle" class="detail">a[3:0]</text>
+  <text x="100" y="267" text-anchor="middle" class="detail">b[3:0]</text>
+  <text x="100" y="292" text-anchor="middle" class="detail">clk, rst_n</text>
+
+  <rect class="reg" x="240" y="140" width="170" height="190"/>
+  <text x="325" y="184" text-anchor="middle" class="label">Input registers</text>
+  <text x="325" y="215" text-anchor="middle" class="detail">a_reg[3:0]</text>
+  <text x="325" y="241" text-anchor="middle" class="detail">b_reg[3:0]</text>
+  <text x="325" y="278" text-anchor="middle" class="detail">8 D flip-flops</text>
+  <text x="325" y="303" text-anchor="middle" class="detail">async active-low reset</text>
+
+  <rect class="array" x="500" y="92" width="300" height="286"/>
+  <text x="650" y="132" text-anchor="middle" class="label">Combinational array</text>
+  <line class="wire" x1="530" y1="154" x2="770" y2="154"/>
+  <text x="545" y="183" class="detail">Row 0: 4 AND gates → p[0]</text>
+  <text x="545" y="216" class="detail">Row 1: 4 AND + 4 full adders → p[1]</text>
+  <text x="545" y="249" class="detail">Row 2: 4 AND + 4 full adders → p[2]</text>
+  <text x="545" y="282" class="detail">Row 3: 4 AND + 4 full adders → p[7:3]</text>
+  <line class="wire" x1="530" y1="303" x2="770" y2="303"/>
+  <text x="650" y="336" text-anchor="middle" class="detail">ripple carry between each row</text>
+  <text x="650" y="361" text-anchor="middle" class="detail">partial products: a_reg AND b_reg[i]</text>
+
+  <rect class="reg" x="880" y="140" width="170" height="190"/>
+  <text x="965" y="184" text-anchor="middle" class="label">Output register</text>
+  <text x="965" y="220" text-anchor="middle" class="detail">p[7:0]</text>
+  <text x="965" y="258" text-anchor="middle" class="detail">8 D flip-flops</text>
+  <text x="965" y="293" text-anchor="middle" class="detail">registered product</text>
+
+  <path class="arrow" d="M165,235 L235,235"/>
+  <path class="arrow" d="M410,235 L495,235"/>
+  <path class="arrow" d="M800,235 L875,235"/>
+  <path class="arrow" d="M1050,235 L1100,235"/>
+  <text x="1077" y="217" text-anchor="middle" class="detail">p[7:0]</text>
+
+  <path class="wire" d="M100,330 L100,445 L965,445 L965,335"/>
+  <text x="535" y="478" text-anchor="middle" class="detail">Clock and asynchronous reset connect to both register banks</text>
+</svg>
