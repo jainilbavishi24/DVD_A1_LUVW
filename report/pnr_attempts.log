@@ -1,0 +1,11 @@
+period=3.5 rc=2 run=RUN_2026-10-17_20-12-21 setup_ws=-2.5460514417412115 setup_vio=15 drc=0 lvs=0
+period=4.0 rc=2 run=RUN_2026-10-17_20-14-52 setup_ws=-2.027291725207803 setup_vio=15 drc=0 lvs=0
+period=4.5 rc=2 run=RUN_2026-10-17_20-17-20 setup_ws=-1.52715888701915 setup_vio=12 drc=0 lvs=0
+period=5.0 rc=2 run=RUN_2026-10-17_20-19-55 setup_ws=-1.0271588315079971 setup_vio=9 drc=0 lvs=0
+period=5.5 rc=2 run=RUN_2026-10-17_20-22-25 setup_ws=-0.5271587759968444 setup_vio=9 drc=0 lvs=0
+period=6.0 rc=2 run=RUN_2026-10-17_20-24-56 setup_ws=-0.036977089103948965 setup_vio=1 drc=0 lvs=0
+period=6.5 rc=2 run=RUN_2026-10-17_20-27-31 setup_ws=-0.2052296168875585 setup_vio=6 drc=0 lvs=0
+period=7.0 rc=2 run=RUN_2026-10-17_20-29-34 setup_ws=-0.116349155825246 setup_vio=5 drc=0 lvs=0
+period=7.5 rc=2 run=RUN_2026-10-17_20-31-58 setup_ws=-0.13816592705457045 setup_vio=5 drc=0 lvs=0
+period=8.0 rc=0 run=RUN_2026-10-17_20-33-54 setup_ws=0.36183412845658236 setup_vio=0 drc=0 lvs=0
+SUCCESS period=8.0 run=RUN_2026-10-17_20-33-54
