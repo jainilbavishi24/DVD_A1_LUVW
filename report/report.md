@@ -1,86 +1,92 @@
 # Digital VLSI Assignment: 4-bit Array Multiplier
 
-**Student:** Jainil Bavishi
-**Roll number:** 2023102045
+**Team:** Jainil Bavishi (2023102045), Vaibhav Wadhwani (2023102058)
 **Technology:** SkyWater SKY130, `sky130_fd_sc_hd`
 
-## Design
+This is a Markdown summary of [`report.pdf`](report.pdf) (source: [`report.tex`](report.tex)), which has the figures and full answers. All numbers come from the current IIC-OSIC-TOOLS image (Yosys 0.70, OpenSTA 3.1.0, LibreLane 3.1.0.dev3).
 
-The design is a registered 4-bit by 4-bit unsigned array multiplier. Four AND-gate rows form the partial products. The first row supplies `p[0]`; each of the following three rows uses four full adders. Thus the array has 16 AND gates and 12 full adders. Four input flip-flops register each operand and eight output flip-flops register the product. A value applied before edge 1 is captured into the input registers on edge 1 and appears at `p` on edge 2.
+## Part A — Design and verification
 
-## Example multiplication
+Registered 4 × 4 unsigned array multiplier: 16 AND gates, 12 `full_adder` instances, 8 input and 8 output flip-flops with asynchronous active-low reset. Latency 2 cycles, throughput 1 result per cycle.
 
-The final roll-number digit is 5, so the required example is `A = 5 + 5 = 10` and `B = 7`.
+- RTL simulation: `PASS: 256 vectors checked, 0 errors`
+- Fault injection (`sum = a ^ b`): `FAIL: 256 vectors checked, 95 errors`, RTL restored
+- Example (Jainil Bavishi's roll number 2023102045, last digit 5): A = 5 + 5 = 10, B = 7
 
 ```
-      1010   (10)
-    x 0111   (7)
-    ------
-      1010
-     10100
-    101000
-   0000000
-    ------
-   1000110   (70)
+        1 0 1 0      A = 10
+      x 0 1 1 1      B = 7
+   ---------------
+        1 0 1 0      pp0 = A AND b0 (b0 = 1)
+      1 0 1 0        pp1 = A AND b1 (b1 = 1), shifted 1
+    1 0 1 0          pp2 = A AND b2 (b2 = 1), shifted 2
+  0 0 0 0            pp3 = A AND b3 (b3 = 0), shifted 3
+   ---------------
+0 1 0 0 0 1 1 0      P = 70
 ```
 
-## Verification
-
-The self-checking testbench applies every one of the 256 possible `(a,b)` combinations. It holds asynchronous reset low for two rising edges, waits for the two-edge register latency, compares `p` against the testbench reference multiplication, reports every mismatch, and emits `PASS: 256 vectors checked, 0 errors` only when all cases match. It also writes `mult.vcd` for waveform inspection.
-
-The final measured synthesis, timing and place-and-route results are inserted below after running the reproducible flow.
+In the waveform the operands are applied at 3360 ns, captured at edge 1 (3365 ns), and `p = 70` is captured at edge 2 (3375 ns).
 
 ## Part B — Logic synthesis
 
-| Metric | Measured value |
+| Metric | Value |
 | --- | --- |
-| Total number of cells | 63 cells |
-| Number of flip-flops | 16 `sky130_fd_sc_hd__dfrtp_1` cells |
-| Total cell area (µm²) | 740.7104 µm² |
-| Flip-flop area (µm²) | 400.3840 µm² |
-| Flip-flop area (% of total) | 54.05% |
-| Three most-used cell types | `dfrtp_1`: 16; `nand2_1`: 8; `a21oi_1`: 6 |
-| Gate-level simulation | PASS: 256 vectors checked, 0 errors |
+| Total number of cells | 61 |
+| Number of flip-flops | 16 `sky130_fd_sc_hd__dfrtp_1` |
+| Total cell area | 756.976 µm² |
+| Flip-flop area | 16 × 25.024 = 400.384 µm² |
+| Flip-flop area (% of total) | 52.89% |
+| Three most-used cell types | `dfrtp_1`: 16; `nand2_1`: 7; `maj3_1` and `and2_0`: 4 each |
+| Netlist simulation | `PASS: 256 vectors checked, 0 errors` |
 
-The logic-cell count is not simply 28 because each full-adder Boolean expression maps to several library gates and synthesis can optimize or decompose logic to match available SKY130 cells. The 16 registers are separate sequential library cells and are included in total cell count and area.
+## Part C — Static timing analysis (tt_025C_1v80)
 
-## Part C — Static timing analysis
-
-| Metric | Measured value |
+| Metric | Value |
 | --- | --- |
-| Worst slack at 10 ns (ns) | 7.40 ns |
-| Minimum period, T_min (ns) | 2.60 ns |
-| F_max (MHz) | 384.615 MHz |
-| Slack at T_min (ns) | -0.004 ns |
-| Critical-path start point | `_095_/Q` input-register output |
-| Critical-path end point | `_092_/D` output-register input |
-| Cells on the critical path | 10 cells including endpoint flip-flops |
-| Latency (ns) | 5.20 ns |
-| Throughput (million results/s) | 384.615 million results/s |
+| Worst slack at T = 10 ns | 7.21 ns |
+| T_min | 2.79 ns |
+| F_max | 358.42 MHz |
+| Slack at T = T_min | +0.003 ns |
+| Critical-path start point | `_91_` (input register `a_reg[1]`) |
+| Critical-path end point | `_88_/D` (output register `p[6]`, sum of `fa_r3_3`) |
+| Cells on the critical path | 10 (8 combinational + 2 flip-flops) |
+| Latency = 2 × T_min | 5.58 ns |
+| Throughput | 358.42 million results/s |
 
-The expected critical path starts at an operand register and ends at a product register. It crosses partial-product logic and the ripple-carry network. For an N-bit array, the estimate is approximately 2N full-adder delays, or about eight for N = 4; mapped standard-cell paths express this with multiple gates per full-adder stage.
+Path: `dfrtp_1` → `clkinv_1` → `o311ai_0` → `a21oi_1` → `maj3_1` → `xnor3_1` → `maj3_1` → `maj3_1` → `xor3_1` → `dfrtp_1`. Five combinational cells are full-adder carry (`maj3`) and sum (`xnor3`, `xor3`) functions; the first three are AND gates merged with the simplified row-1 adder.
 
 ## Part D — Physical design
 
-| Metric | Measured value |
+The initial period is ceil_0.5(1.2 × 2.79) = 3.50 ns. Every run had 0 DRC and 0 LVS errors, and the limiting corner was always `max_ss_100C_1v60`.
+
+| Run | CLOCK_PERIOD (ns) | WNS, all corners (ns) | WNS, nom tt (ns) | Setup violations |
+| --- | --- | --- | --- | --- |
+| 1 | 3.50 | −2.546 | +0.431 | 15 |
+| 2 | 4.00 | −2.027 | +0.929 | 15 |
+| 3 | 4.50 | −1.527 | +1.429 | 12 |
+| 4 | 5.00 | −1.027 | +1.929 | 9 |
+| 5 | 5.50 | −0.527 | +2.429 | 9 |
+| 6 | 6.00 | −0.037 | +2.911 | 1 |
+| 7 | 6.50 | −0.205 | +3.111 | 6 |
+| 8 | 7.00 | −0.116 | +3.526 | 5 |
+| 9 | 7.50 | −0.138 | +3.722 | 5 |
+| 10 | 8.00 | +0.362 | +4.222 | 0 |
+
+| Metric | Value |
 | --- | --- |
-| CLOCK_PERIOD used (ns) | 6.50 ns |
-| Number of runs needed | 7 runs |
-| Core area (µm²) | 17,759.5 µm² |
-| Cells after synthesis | 63 cells |
-| Cells after place and route | 1,901 instances |
-| Added cell kinds | 1,566 filler cells; 245 tap cells; 19 timing-repair buffers; 3 clock buffers |
-| Wirelength (µm) | 2,405 µm |
-| Setup slack (ns) | 0.085280 ns |
-| Post-route F_max (MHz) | 155.891 MHz |
-| F_max from Part C (MHz) | 384.615 MHz |
-| DRC errors | 0 errors |
-| LVS errors | 0 errors |
-
-Post-route frequency is normally lower than pre-layout frequency because placement and routing add wire delay and parasitics. The physical flow also adds clock buffers to control clock insertion delay, filler cells to complete legal placement rows, tap cells to protect against latch-up, and decoupling cells to stabilize the local supply.
-
-DRC verifies that the physical geometry follows manufacturing rules such as width, spacing and enclosure. LVS compares the extracted physical netlist with the intended schematic/netlist. Both must pass because a layout can obey geometry rules yet implement incorrect connectivity, or have correct connectivity while violating a process rule.
+| CLOCK_PERIOD used | 8.00 ns |
+| Number of runs needed | 10 |
+| Core area / die area | 17,759.5 µm² / 22,500 µm² |
+| Cells after synthesis | 61 |
+| Cells after place and route | 1,884 instances (86 excluding fillers and taps) |
+| Kinds of cells added | 1,299 decap + 254 filler cells; 245 tap cells; 21 timing-repair buffers; 3 clock buffers |
+| Wirelength | 2,518 µm |
+| Setup slack | 0.3618 ns |
+| Post-route F_max = 1000/(T − slack) | 130.92 MHz |
+| F_max from Part C | 358.42 MHz |
+| DRC errors (Magic / KLayout) | 0 / 0 |
+| LVS errors | 0 |
 
 ## Scaling to an 8-bit multiplier
 
-For N bits, the array uses N² AND gates and N(N−1) full adders. At N = 8 this is 64 AND gates and 56 full adders, compared with 16 and 12 at N = 4. The longest path estimate grows from 2 × 4 = 8 full-adder delays to 2 × 8 = 16 full-adder delays, so delay roughly doubles and maximum frequency roughly halves before layout effects.
+N² AND gates and N(N−1) full adders: 64 and 56 at N = 8, against 16 and 12 at N = 4. The critical path grows from about 8 to about 16 full-adder delays. Scaling the measured path (2.254 ns of logic doubles to about 4.51 ns, plus 0.398 ns clock-to-Q and 0.135 ns setup) gives T_min ≈ 5.04 ns, or F_max ≈ 198 MHz before layout effects.
