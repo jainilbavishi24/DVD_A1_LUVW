@@ -23,7 +23,7 @@ for file in \
   check_file "$file"
 done
 
-instances=$(rg -c 'full_adder fa_' rtl/mult_array.v || true)
+instances=$(grep -c 'full_adder fa_' rtl/mult_array.v || true)
 if [[ "$instances" == 12 ]]; then
   echo 'OK   exactly 12 full_adder instances'
 else
@@ -31,7 +31,7 @@ else
   errors=$((errors + 1))
 fi
 
-if rg -n '\*' rtl >/dev/null; then
+if grep -rn '\*' rtl >/dev/null; then
   echo 'FAIL multiplication operator found in RTL' >&2
   errors=$((errors + 1))
 else
@@ -61,7 +61,7 @@ fi
 
 if [[ -s pnr/metrics.json ]]; then
   check_metric() {
-    if rg -q "\"$1\"[[:space:]]*:[[:space:]]*$2([,.}]|$)" pnr/metrics.json; then
+    if grep -Eq "\"$1\"[[:space:]]*:[[:space:]]*$2([,}[:space:]]|$)" pnr/metrics.json; then
       echo "OK   $1 = $2"
     else
       echo "FAIL expected $1 = $2" >&2
