@@ -32,21 +32,17 @@ module tb_mult;
         @(negedge clk);
         rst_n = 1'b1;
 
-        // Apply each input before edge 1, then check after edge 2.
+        // Each iteration starts on a falling edge: apply the input before
+        // edge 1, then check after edge 2.
         for (i = 0; i < 256; i = i + 1) begin
-            @(negedge clk);
             a = i / 16;
             b = i % 16;
             expected = (i / 16) * (i % 16);
 
             repeat (2) @(posedge clk);
-`ifdef GATE_LEVEL
-            // Standard-cell UNIT_DELAY=#1 updates Q in the same timestep as
-            // a #1 testbench sample. Avoid that simulator scheduling race.
-            #2;
-`else
-            #1;
-`endif
+            // Sample half a cycle after edge 2, well clear of the flip-flop
+            // clock-to-Q update (#1 with the standard-cell UNIT_DELAY models).
+            @(negedge clk);
             if (p !== expected) begin
                 $display("MISMATCH: a=%0d b=%0d expected=%0d got=%0d at %0t", a, b, expected, p, $time);
                 errors = errors + 1;

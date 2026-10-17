@@ -20,7 +20,7 @@ iverilog -g2012 -o sim tb/tb_mult.v rtl/full_adder.v rtl/mult_array.v
 vvp sim | tee report/rtl_simulation.log
 
 yosys -c synth/synth.tcl | tee report/synthesis.log
-iverilog -g2012 -DGATE_LEVEL -DFUNCTIONAL -DUNIT_DELAY='#1' -o gls \
+iverilog -g2012 -DFUNCTIONAL -DUNIT_DELAY=#1 -o gls \
   tb/tb_mult.v "$cells/primitives.v" "$cells/sky130_fd_sc_hd.v" synth/mult_array_netlist.v
 vvp gls | tee report/gls_simulation.log
 
