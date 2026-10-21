@@ -112,6 +112,19 @@ tectonic report/report.tex                        # or: pdflatex -output-directo
 
 [`run_full_flow.sh`](run_full_flow.sh) repeats Parts A–D using the period currently in `pnr/config.json` and copies the final artifacts; [`verify_submission.sh`](verify_submission.sh) checks that every deliverable is present and passing.
 
+## Automated tests
+
+GitHub Actions runs the fast test suite on every push and pull request. It checks shell and JSON syntax, the structural RTL requirements, all 256 input combinations, deliberate fault detection, generic Yosys synthesis and the committed submission artifacts. The complete SKY130 RTL-to-GDSII flow remains available through `./run_full_flow.sh` because it requires the much larger IIC-OSIC-TOOLS image and PDK.
+
+To run the same fast suite locally after installing Icarus Verilog and Yosys:
+
+```bash
+sudo apt-get install -y iverilog yosys
+./ci/test.sh
+```
+
+Workflow results appear on the repository's [Actions page](https://github.com/jainilbavishi24/DVD_A1_LUVW/actions).
+
 ## Design notes
 
 - `rtl/full_adder.v` uses continuous `assign` statements only.

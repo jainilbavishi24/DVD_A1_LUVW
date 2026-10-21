@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: RTL and submission checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install HDL tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends iverilog yosys
+
+      - name: Run CI test suite
+        run: ./ci/test.sh
