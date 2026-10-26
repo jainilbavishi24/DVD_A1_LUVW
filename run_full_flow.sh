@@ -44,4 +44,14 @@ fi
 cp "$metrics" pnr/metrics.json
 cp "$gds" pnr/mult_array.gds
 printf 'LIBRELANE_RUN=%s\n' "$run_dir" | tee report/librelane_run.env
-echo "Complete flow finished. Final artifacts: pnr/metrics.json and pnr/mult_array.gds"
+
+# Redraw the report screenshots from the new GDSII.
+klayout -zz -r render_layout.py
+
+# The PDF cannot be built here (no LaTeX in the image). verify_submission.sh
+# compares the numbers quoted in report/report.tex with the files just
+# regenerated, so a run that changes any of them fails here instead of
+# silently leaving a stale report.
+./verify_submission.sh
+echo "Complete flow finished. Final artifacts: pnr/metrics.json, pnr/mult_array.gds and the layout screenshots."
+echo "Rebuild report/report.pdf on the host after editing report/report.tex (see README)."
