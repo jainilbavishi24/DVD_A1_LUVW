@@ -152,3 +152,10 @@ Workflow results appear on the repository's [Actions page](https://github.com/ja
 | Place and route | 8.00 ns clock after 10 runs, setup slack 0.3618 ns, post-route F_max 130.92 MHz |
 | Signoff | 0 Magic DRC errors, 0 KLayout DRC errors, 0 LVS errors |
 | Electrical checks | 11 max-slew violations at `max_ss_100C_1v60`, all on the reset fanout net; 0 max-cap, 0 max-fanout (not part of the acceptance criteria, explained in report Part D) |
+
+## Contributions
+
+Both of us worked on every part and reviewed each other's results. The full breakdown is in Section 8 of the report.
+
+- **Jainil Bavishi:** structural RTL, exhaustive testbench and fault-injection check; Docker launcher and flow scripts; first full RTL-to-GDSII pass; block diagram and hand-worked example; GitHub Actions; the second-machine rerun that found the image dependence and the slew violations; report Parts A and B.
+- **Vaibhav Wadhwani:** gate-level simulation race fix; synthesis and STA on the 2026.10 image; the ten LibreLane timing-closure runs and slow-corner analysis; KLayout renderer, waveform capture and layout screenshots; image pinning and report cross-check in the flow; report Parts C and D.

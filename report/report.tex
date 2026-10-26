@@ -179,6 +179,27 @@ Icarus Verilog 14.0 (devel); GTKWave v4.0.0-prealpha (f6d60e0); Yosys 0.70 (28ba
 
 The numbers depend on the exact image. Before the image was pinned, Jainil re-ran the whole flow on a second machine that had an older cached build (digest \code{b87b3f\ldots}). Every check still passed, but synthesis gave 63 cells and $T_{min}=2.60$ ns, and the 8.00 ns layout had 1,901 instances with 1.585 ns of setup slack. For this reason \code{run-osic.sh} now pins the digest above, \code{run\_flow.sh} warns when it runs in a different image version, and \code{verify\_submission.sh} fails if the numbers quoted in this report no longer match the regenerated files. \code{run\_full\_flow.sh} also redraws both layout screenshots from the new GDSII; only this PDF has to be rebuilt by hand, because the image has no LaTeX.
 
+\section{Team contributions}
+Both of us worked on every part of the assignment and checked each other's results. The lists show who led each piece of work.
+
+\textbf{Jainil Bavishi (2023102045)}
+\begin{itemize}[leftmargin=*,nosep]
+\item Structural RTL (\code{full\_adder.v}, \code{mult\_array.v}), the exhaustive self-checking testbench and the fault-injection check.
+\item Docker launcher and flow scripts (\code{run-osic.sh}, \code{run\_flow.sh}, \code{run\_full\_flow.sh}, \code{verify\_submission.sh}), and the first complete RTL-to-GDSII pass on the older image.
+\item Block diagram and the hand-worked $10\times7$ example.
+\item GitHub Actions checks, and the rerun on a second machine that exposed the image dependence and the slow-corner slew violations.
+\item Report: Parts A and B, answers 1, 3 and 5.
+\end{itemize}
+
+\textbf{Vaibhav Wadhwani (2023102058)}
+\begin{itemize}[leftmargin=*,nosep]
+\item Found and fixed the clock-to-Q race that made gate-level simulation fail with the assignment's exact command.
+\item Re-ran synthesis and STA on the 2026.10 image, and ran and analysed the ten LibreLane timing-closure attempts.
+\item KLayout render script, GTKWave capture and the layout screenshots.
+\item Pinned the tool image, and added screenshot rendering and the report cross-check to the flow scripts.
+\item Report: Parts C and D, answers 2, 4 and 6.
+\end{itemize}
+
 \section{Conclusion}
 The structural RTL passed exhaustive RTL and gate-level simulation with the assignment's exact commands, and the fault-injection check confirmed that the testbench detects errors. Synthesis produced 61 cells (756.976 $\mu$m$^2$), STA gave $T_{min}=2.79$ ns ($F_{max}=358.42$ MHz), and LibreLane closed timing at an 8.00 ns clock after 10 runs with 0.3618 ns setup slack, 0 DRC errors and 0 LVS errors. The only open items are the 11 slow-corner slew violations on the reset net described in Section~\ref{sec:pnr}, which are outside the acceptance criteria.
 
