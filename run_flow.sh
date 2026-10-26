@@ -2,6 +2,13 @@
 # Run inside IIC-OSIC-TOOLS from /foss/designs/mult4_2023102045.
 set -euo pipefail
 
+# The committed logs, netlist, GDS and report numbers come from image 2026.10
+# (pinned in run-osic.sh). Other images still pass, but with different numbers.
+if [[ "${IIC_OSIC_TOOLS_VERSION:-unknown}" != 2026.10 ]]; then
+  echo "WARNING: running in IIC-OSIC-TOOLS ${IIC_OSIC_TOOLS_VERSION:-unknown}, not 2026.10." >&2
+  echo "         Cell counts and timing will not match report/report.tex." >&2
+fi
+
 # IIC-OSIC-TOOLS 2026 exposes the selector as a sourceable script; older
 # images provide the compatible sak-pdk command.
 if command -v sak-pdk >/dev/null 2>&1; then
