@@ -16,11 +16,12 @@
 \begin{center}
 {\Large Digital VLSI Assignment: 4-bit Array Multiplier from RTL to GDSII}\\[3pt]
 {\large Jainil Bavishi (2023102045) \quad|\quad Vaibhav Wadhwani (2023102058)}\\[2pt]
-SkyWater SKY130 \code{sky130\_fd\_sc\_hd} standard-cell library
+SkyWater SKY130 \code{sky130\_fd\_sc\_hd} standard-cell library\\[2pt]
+Repository: \url{https://github.com/jainilbavishi24/DVD_A1_LUVW}
 \end{center}
 
 \section{Introduction}
-This report implements a registered, unsigned 4-bit by 4-bit array multiplier and takes it from structural Verilog to a routed GDSII layout. The flow used Icarus Verilog for simulation, GTKWave for waveforms, Yosys for synthesis, OpenSTA for timing analysis, and LibreLane for physical design. Every number below comes from IIC-OSIC-TOOLS 2026.10 (digest \code{sha256:306585de35d1\ldots}), which \code{run-osic.sh} pins by digest; the tool versions are listed in Section~\ref{sec:tools}. All generated artifacts, scripts, logs and the final GDSII are included in the repository.
+This report implements a registered, unsigned 4-bit by 4-bit array multiplier and takes it from structural Verilog to a routed GDSII layout. The flow used Icarus Verilog for simulation, GTKWave for waveforms, Yosys for synthesis, OpenSTA for timing analysis, and LibreLane for physical design. Every number below comes from IIC-OSIC-TOOLS 2026.10 (digest \code{sha256:306585de35d1\ldots}), which \code{run-osic.sh} pins by digest; the tool versions are listed in Section~\ref{sec:tools}. All generated artifacts, scripts, logs and the final GDSII are in the GitHub repository linked above, and its README lists every command in the order we ran them.
 
 \section{Design and verification (Part A)}
 The multiplier registers \code{a[3:0]} and \code{b[3:0]}, forms the 16 partial-product bits $pp_i[j]=a[j]\,\&\,b[i]$, and adds rows 1--3 with exactly 12 instances of \code{full\_adder}, following the connection table of the assignment. Row 0 contributes \code{p[0]}; the lowest sum of each later row is \code{p[1]}, \code{p[2]} and \code{p[3]}, and row 3 also produces \code{p[7:4]}. The combinational result is captured in the 8-bit output register, so there are 16 AND gates, 12 full adders and 16 flip-flops, all with asynchronous active-low reset. An input applied before edge 1 is captured at edge 1 and its product is captured at edge 2, giving a latency of 2 cycles and a throughput of 1 result per cycle.
