@@ -1,4 +1,4 @@
-# 4-bit Array Multiplier — RTL to GDSII on SKY130
+# 4-bit Array Multiplier: RTL to GDSII on SKY130
 
 | Team member | Roll number |
 | --- | --- |
@@ -7,7 +7,13 @@
 
 This repository contains a registered structural 4-bit unsigned array multiplier, verified exhaustively across all 256 input combinations and taken through synthesis, static timing analysis and place-and-route to GDSII in the SKY130 `sky130_fd_sc_hd` standard-cell library. The completed report is [`report/report.pdf`](report/report.pdf).
 
-All results were produced with the IIC-OSIC-TOOLS image `hpretl/iic-osic-tools:latest` (digest `sha256:306585de35d1…`): Icarus Verilog 14.0 (devel), GTKWave v4.0.0-prealpha, Yosys 0.70, OpenSTA 3.1.0, LibreLane 3.1.0.dev3, KLayout 0.30.12. Older images give slightly different synthesis results and timing.
+All results were produced with IIC-OSIC-TOOLS 2026.10: Icarus Verilog 14.0 (devel), GTKWave v4.0.0-prealpha, Yosys 0.70, OpenSTA 3.1.0, LibreLane 3.1.0.dev3, KLayout 0.30.12. [`run-osic.sh`](run-osic.sh) pins this image by digest:
+
+```
+hpretl/iic-osic-tools:2026.10@sha256:306585de35d198e70ea58950f77147c86f56c698726a19afea9f1c83009557be
+```
+
+Other builds still pass every check but give different numbers. With an older cached image (digest `b87b3f…`) synthesis gave 63 cells and T_min = 2.60 ns, and the 8.00 ns layout had 1,901 instances with 1.585 ns setup slack. To try another image anyway, set `OSIC_IMAGE` before calling `run-osic.sh`; `run_flow.sh` prints a warning when the image version is not 2026.10.
 
 ## Environment
 
@@ -27,7 +33,8 @@ Clone the repository and start a shell in the tools container. [`run-osic.sh`](r
 ```bash
 git clone https://github.com/jainilbavishi24/DVD_A1_LUVW.git
 cd DVD_A1_LUVW
-./run-osic.sh
+./run-osic.sh                      # interactive shell
+./run-osic.sh ./run_full_flow.sh   # or run the whole flow and exit
 ```
 
 All commands below are run inside the container from the repository root. Select the SKY130 PDK first. Current images provide the selector as a sourceable script; older images provide `sak-pdk`:
@@ -39,7 +46,7 @@ echo $PDK_ROOT $PDK                                   # /foss/pdks sky130A
 
 ## Commands run, in order
 
-### Part A — RTL design and verification
+### Part A: RTL design and verification
 
 ```bash
 iverilog -g2012 -o sim tb/tb_mult.v rtl/full_adder.v rtl/mult_array.v
@@ -53,7 +60,7 @@ Fault-injection check: temporarily change `sum` to `a ^ b`, rerun, confirm FAIL,
 ./check_fault_injection.sh                        # FAIL: 256 vectors checked, 95 errors
 ```
 
-### Part B — Logic synthesis
+### Part B: Logic synthesis
 
 ```bash
 yosys -c synth/synth.tcl | tee report/synthesis.log
@@ -63,7 +70,7 @@ iverilog -g2012 -DFUNCTIONAL -DUNIT_DELAY=#1 -o gls \
 vvp gls | tee report/gls_simulation.log           # PASS: 256 vectors checked, 0 errors
 ```
 
-### Part C — Static timing analysis
+### Part C: Static timing analysis
 
 [`sta/sta.tcl`](sta/sta.tcl) uses a 10 ns clock unless `CLOCK_PERIOD` is set in the environment.
 
@@ -76,7 +83,7 @@ T_min = 10.00 − 7.21 = 2.79 ns, so F_max = 358.42 MHz. `sta/mult_array_timing.
 
 [`run_flow.sh`](run_flow.sh) runs the PDK selection and every command in Parts A–C (up to the 10 ns STA) in one go.
 
-### Part D — Physical design
+### Part D: Physical design
 
 The first LibreLane period is ceil_0.5(1.2 × 2.79 ns = 3.348 ns) = 3.50 ns. Each attempt was run from `pnr/` after changing only `CLOCK_PERIOD` in [`pnr/config.json`](pnr/config.json); the period was increased by 0.5 ns after every run with setup violations.
 
@@ -110,7 +117,7 @@ The report source is [`report/report.tex`](report/report.tex). The container has
 tectonic report/report.tex                        # or: pdflatex -output-directory report report/report.tex (twice)
 ```
 
-[`run_full_flow.sh`](run_full_flow.sh) repeats Parts A–D using the period currently in `pnr/config.json` and copies the final artifacts; [`verify_submission.sh`](verify_submission.sh) checks that every deliverable is present and passing.
+[`run_full_flow.sh`](run_full_flow.sh) repeats Parts A–D using the period currently in `pnr/config.json`, copies the final artifacts, redraws both layout screenshots and then runs [`verify_submission.sh`](verify_submission.sh). The preflight checks that every deliverable is present and passing, prints any max-slew/cap/fanout violations as non-blocking warnings, and fails if the numbers quoted in `report/report.tex` (cell count, T_min, final period, PnR instance count, setup slack, slew count) no longer match the regenerated files. The PDF itself still has to be rebuilt on the host as shown above.
 
 ## Automated tests
 
@@ -144,3 +151,4 @@ Workflow results appear on the repository's [Actions page](https://github.com/ja
 | STA (tt_025C_1v80) | WNS at 10 ns = 7.21 ns, T_min = 2.79 ns, F_max = 358.42 MHz |
 | Place and route | 8.00 ns clock after 10 runs, setup slack 0.3618 ns, post-route F_max 130.92 MHz |
 | Signoff | 0 Magic DRC errors, 0 KLayout DRC errors, 0 LVS errors |
+| Electrical checks | 11 max-slew violations at `max_ss_100C_1v60`, all on the reset fanout net; 0 max-cap, 0 max-fanout (not part of the acceptance criteria, explained in report Part D) |
